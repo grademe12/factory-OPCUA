@@ -1,0 +1,104 @@
+services:
+  modbus-device:
+    image: oitc/modbus-server:latest
+    container_name: modbus-plc
+    ports:
+      - "5020:5020"
+    networks:
+      - pearl-factory-vpc
+    restart: unless-stopped
+
+  modbus-writer:
+    build: ./modbus
+    container_name: modbus-data-writer
+    depends_on:
+      - modbus-device
+    environment:
+      - MODBUS_HOST=modbus-device
+      - MODBUS_PORT=5020
+    networks:
+      - pearl-factory-vpc
+    restart: unless-stopped
+
+  # bacnet-device:
+  #   image: fh1ch/bacnet-device-simulator:latest
+  #   container_name: bacnet-plc
+  #   ports:
+  #     - "47808:47808/udp"
+  #   environment:
+  #     - DEVICE_ID=1234
+  #     - DEVICE_NAME=HVAC_Controller
+  #     - OBJECT_NAME=Building_1
+  #     - OBJECT_INSTANCE=1
+  #   networks:
+  #     - pearl-factory-vpc
+  #   restart: unless-stopped
+
+  # s7-device:
+  #   image: snap7/snap7-server:latest
+  #   container_name: s7-plc
+  #   ports:
+  #     - "102:102"
+  #   environment:
+  #     - RACK=0
+  #     - SLOT=2
+  #     - DB_COUNT=5
+  #     - DB_SIZE=256
+  #   command: ["/opt/snap7/bin/snap7-server", "0.0.0.0"]
+  #   networks:
+  #     - pearl-factory-vpc
+  
+  # dnp3-device:
+  #   image: automatek/dnp3-demo:latest
+  #   container_name: dnp3-plc
+  #   ports:
+  #     - "20000:20000"
+  #   environment:
+  #     - OUTSTATION_ID=10
+  #     - MASTER_ID=1
+  #     - PORT=20000
+  #     - POINTS_ANALOG=10
+  #     - POINTS_BINARY=16
+  #     - POINTS_COUNTER=5
+  #   command: ["outstation", "--address", "0.0.0.0", "--port", "20000"]
+  #   networks:
+  #     - pearl-factory-vpc
+  #   restart: unless-stopped
+
+  # enip-device:
+  #   image: softwaretoolbox/enip-simulator:latest
+  #   container_name: allen-bradley-plc
+  #   ports:
+  #     - "44818:44818"  # EtherNet/IP 표준 포트
+  #     - "2222:2222"    # CIP 포트
+  #   environment:
+  #     - DEVICE_NAME=CompactLogix_5380
+  #     - VENDOR_ID=1
+  #     - DEVICE_TYPE=14
+  #     - PRODUCT_CODE=55
+  #     - SLOT=0
+  #   networks:
+  #     - pearl-factory-vpc
+  #   restart: unless-stopped
+
+  opcua-gateway:
+    build: ./opcua-gateway
+    container_name: opcua-gateway
+    ports:
+      - "4840:4840"
+    environment:
+      - MODBUS_HOST=modbus-device
+      - MODBUS_PORT=5020
+    networks:
+      - pearl-factory-vpc
+    depends_on:
+      - modbus-device
+      # - bacnet-device
+      # - s7-device
+      # - dnp3-device
+      # - enip-device
+
+networks:
+  pearl-factory-vpc:
+    name: pearl-factory-vpc
+    driver: bridge
