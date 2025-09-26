@@ -177,7 +177,7 @@ MIT License
 
 ## 📧 Contact
 
-- GitHub: [@grademe12](https://github.com/yourusername)
-- Blog: [woosupar.dev](https://yourblog.com)
+- GitHub: [@grademe12](https://github.com/grademe12)
+- Blog: [woosupar.dev](https://woosupar.dev)
 
 ### This README written by Claude.ai
